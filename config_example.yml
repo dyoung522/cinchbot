@@ -1,0 +1,13 @@
+config_dir: ~/.conchbot
+plugins_dir: plugins/enabled
+networks:
+  freenode:
+    server: irc.freenode.net
+    realname: Conch Bot
+    user: conchbot
+    nick: conchbot
+    channels:
+      - '#cinch-bots'
+    sasl:
+      username: username
+      password: password

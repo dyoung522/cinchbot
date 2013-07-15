@@ -16,15 +16,3 @@ class UrbanDictionary
     m.reply(lookup(word) || "No results found", true)
   end
 end
-
-bot = Cinch::Bot.new do
-  configure do |c|
-    c.server = "irc.freenode.net"
-    c.nick   = "MrCinch"
-    c.channels = ["#cinch-bots"]
-    c.plugins.plugins = [UrbanDictionary]
-  end
-end
-
-bot.start
-

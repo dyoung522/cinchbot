@@ -23,14 +23,3 @@ class Google
     m.reply(search(query))
   end
 end
-
-bot = Cinch::Bot.new do
-  configure do |c|
-    c.server = "irc.freenode.net"
-    c.nick   = "MrCinch"
-    c.channels = ["#cinch-bots"]
-    c.plugins.plugins = [Google]
-  end
-end
-
-bot.start

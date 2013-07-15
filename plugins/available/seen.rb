@@ -32,14 +32,3 @@ class Seen
     end
   end
 end
-
-bot = Cinch::Bot.new do
-  configure do |c|
-    c.server   = 'irc.freenode.org'
-    c.channels = ["#cinch-bots"]
-    c.plugins.plugins  = [Seen]
-  end
-end
-
-bot.start
-

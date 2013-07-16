@@ -1,7 +1,7 @@
 require 'open-uri'
 require 'cinch'
 
-class TinyURL
+class TinyUrl
   include Cinch::Plugin
 
   listen_to :channel

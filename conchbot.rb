@@ -1,5 +1,6 @@
 require 'cinch'
 require 'yaml'
+require 'thwait'
 
 # Add camelcase method to Strings
 class String
@@ -33,7 +34,7 @@ class BotConfig
   end
 
   # Container attributes
-  attr_reader :networks, :plugins
+  attr_reader :networks
 
   def initialize( config_file )
     return unless config_file
@@ -78,30 +79,41 @@ class BotConfig
     puts "#{@plugins.count > 0 ? @plugins.count : 'no'} plugins loaded."
 
   end
+
+  def plugins
+    @plugins.map { |f| f.classname }
+  end
+
 end
 
 # Load and process the config file
 config = BotConfig.new( __FILE__.gsub(/.rb$/, '.yml') ) || exit
+threads = ThreadsWait.new
 
 # cycle through the configured networks and start our bot(s)
 config.networks.each do |name, network|
   puts "Building connection to #{network.server['server']}"
-  bot = Cinch::Bot.new do
-    configure do |c|
-      # c.plugins.plugins = config.plugins.map { |f| Object.const_get(f.classname) }
-      c.plugins.plugins = config.plugins.map { |f| f.classname }
-      network.server.each do |key, value| 
-        case key
-          when /^sasl$/i
-            c.sasl.username = value['username']
-            c.sasl.password = value['password']
-          else
-            c.send( "#{key}=".to_sym, value )
+  thread = Thread.new do
+    bot = Cinch::Bot.new do
+      configure do |c|
+        c.plugins.plugins = config.plugins
+        network.server.each do |key, value| 
+          case key
+            when /^sasl$/i
+              c.sasl.username = value['username']
+              c.sasl.password = value['password']
+            else
+              c.send( "#{key}=".to_sym, value )
+          end
         end
       end
     end
+    bot.start
   end
-  bot.start
+
+  threads.join_nowait( thread )
 end
+
+sleep 1 while threads.all_waits 
 
 puts "That's all folks."

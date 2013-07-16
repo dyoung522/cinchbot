@@ -3,7 +3,7 @@ require 'open-uri'
 require 'nokogiri'
 require 'cgi'
 
-class UrbanDictionary
+class UrbanDict
   include Cinch::Plugin
 
   match /urban (.+)/

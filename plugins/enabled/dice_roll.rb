@@ -1,1 +1,0 @@
-../available/dice_roll.rb

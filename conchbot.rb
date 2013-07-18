@@ -1,6 +1,7 @@
 require 'cinch'
 require 'yaml'
 require 'thwait'
+require 'cinch-authentication'
 
 # Add camelcase method to Strings
 class String

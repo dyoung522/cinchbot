@@ -123,10 +123,17 @@ config.networks.each do |name, network|
     thread = Thread.new do
         bot = Cinch::Bot.new do
             configure do |c|
+                # Authentication configuration
                 c.authentication          = Cinch::Configuration::Authentication.new
                 c.authentication.level    = :users
                 c.authentication.strategy = :list
+                c.authentication.admins   = ['Conch']   # ToDo:  This needs to be dynamic
+                c.authentication.users    = c.authentication.admins
+
+                # Plugin configuration
                 c.plugins.plugins = config.plugins
+
+                # Server configuration
                 network.server.each do |key, value| 
                     case key
                     when /^sasl$/i

@@ -1,0 +1,27 @@
+GIT
+  remote: git://github.com/britishtea/cinch-authentication.git
+  revision: 5493c35733d40cdd1d4638c4149c803e28428e02
+  specs:
+    cinch-authentication (0.1.0)
+      cinch (~> 2.0.3)
+
+GIT
+  remote: git://github.com/cinchrb/cinch.git
+  revision: edcd787a809a4ee809d624683c5afc9b0918c3fe
+  specs:
+    cinch (2.0.5)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    mini_portile (0.5.1)
+    nokogiri (1.6.0)
+      mini_portile (~> 0.5.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  cinch!
+  cinch-authentication!
+  nokogiri

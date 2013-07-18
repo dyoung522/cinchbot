@@ -1,6 +1,22 @@
-config_dir: ~/.conchbot
-plugins_dir: plugins/enabled
+# Copy this file to conchbot.yml and make the appropriate modifications.
+directories:
+  main: ~/conchbot
+  plugins:
+    core:  plugins/core
+    extra: plugins/enabled
 networks:
+  dalnet:
+    server: irc.dal.net
+    realname: Lord Conch
+    user: conchbot
+    nicks: 
+      - ConchBot
+      - LordConch
+    channels:
+      - '#conchbot'
+    sasl:
+      username: username
+      password: password
   freenode:
     server: irc.freenode.net
     realname: Conch Bot

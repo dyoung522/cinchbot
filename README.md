@@ -1,7 +1,7 @@
 CinchBot
 ========
 
-Multi-network IRC bot written in the Cinch framework by 
+Multi-network IRC bot written in the Cinch framework by Dominik Honnef
 
 install
 -------

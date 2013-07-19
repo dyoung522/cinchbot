@@ -12,6 +12,7 @@ require_relative 'lib/botconfig'
 
 $AUTHOR  = 'Donovan C. Young'
 $VERSION = 'v1.1'
+$PROGRAM = "#{File.basename($PROGRAM_NAME).gsub('.rb', '')}" 
 
 # Parse command line arguments
 $options = OptParse.parse(ARGV)

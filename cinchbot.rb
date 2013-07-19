@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'bundler/setup'
+require 'pp'
 require 'yaml'
 require 'thwait'
 require 'sequel'
@@ -39,11 +40,12 @@ class BotConfig
     end
 
     # Container attributes
-    attr_reader :networks
+    attr_reader :defaults, :networks
 
     def initialize( config_file )
         return unless config_file
 
+        @defaults = Hash.new
         @networks = Hash.new
         @plugins  = {
             core: [],
@@ -53,6 +55,10 @@ class BotConfig
         begin
             puts "Reading config from #{config_file}"
             @config = YAML.load_file( config_file )
+
+            # Populate @defaults
+            @config['networks'].delete('defaults').each { |key, value| @defaults[key] = value }
+
             # Load networks hash
             @config['networks'].each { |name, details| @networks[name] = Network.new( details ) }
 
@@ -68,7 +74,7 @@ class BotConfig
         end
 
         # Main Bot Directory (all future paths will be relative to this, unless specified otherwise in the config)
-        dir_main = @config['directories']['main'] || '.'
+        dir_main = @config['dir_main'] || '.'
 
         begin
             Dir.chdir( File.expand_path(dir_main) )
@@ -79,7 +85,7 @@ class BotConfig
 
         # Collect and enable plugins
         # Load core plugins
-        plugins_core = @config['directories']['plugins']['core'] || "#{dir_main}/plugins/core"
+        plugins_core = @config['plugins']['core'] || "#{dir_main}/plugins/core"
 
         raise "Required directory, #{plugins_core}, cannot be found.  Please check your plugins_core configuration item and try again." unless Dir.exists?(plugins_core)
 
@@ -108,6 +114,9 @@ class BotConfig
 
     end
 
+    ##
+    ## Methods
+    ##
     def plugins
         classes = Array.new
         @plugins.keys.each { |key| @plugins[key].map { |f| classes << f.classname } }
@@ -133,12 +142,13 @@ config.networks.each do |name, network|
                 c.authentication          = Cinch::Configuration::Authentication.new
                 c.authentication.level    = :users
                 c.authentication.strategy = :list
-                c.authentication.owner    = config.owner
-                c.authentication.admins   = [config.owner]
-                c.authentication.users    = c.authentication.admins
+                c.authentication.level    = [:owner, :admins, :users]
 
                 # Plugin configuration
                 c.plugins.plugins = config.plugins
+
+                # Set defaults (may be overwritten below)
+                config.defaults.each { |key, value| c.send( "#{key}=".to_sym, value ) }
 
                 # Server configuration
                 network.server.each do |key, value| 
@@ -146,6 +156,10 @@ config.networks.each do |name, network|
                     when /^sasl$/i
                         c.sasl.username = value['username']
                         c.sasl.password = value['password']
+                    when /^auth$/i
+                        c.authentication.owner    = [ value['owner'] ]
+                        c.authentication.admins   = c.authentication.owner  + ( value['admins'] || [] )
+                        c.authentication.users    = c.authentication.admins + ( value['users']  || [] )
                     else
                         c.send( "#{key}=".to_sym, value )
                     end

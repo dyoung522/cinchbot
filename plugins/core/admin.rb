@@ -15,6 +15,7 @@ class Admin
         return unless authenticated?( m, :admins )
 
         channel = m.channel if channel.to_s.empty?
+        reason = nil if reason.to_s.empty?
 
         if bot.channels.include?(channel)
             bot.part( channel, reason || "requested by #{m.nick}" )

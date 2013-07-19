@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+require 'rubygems'
+require 'bundler/setup'
 require 'yaml'
 require 'thwait'
 require 'sequel'
@@ -50,9 +52,9 @@ class BotConfig
 
         begin
             puts "Reading config from #{config_file}"
-            config = YAML.load_file( config_file )
+            @config = YAML.load_file( config_file )
             # Load networks hash
-            config['networks'].each { |name, details| @networks[name] = Network.new( details ) }
+            @config['networks'].each { |name, details| @networks[name] = Network.new( details ) }
 
         # Syntax Error
         rescue Psych::SyntaxError
@@ -66,7 +68,7 @@ class BotConfig
         end
 
         # Main Bot Directory (all future paths will be relative to this, unless specified otherwise in the config)
-        dir_main = config['directories']['main'] || '.'
+        dir_main = @config['directories']['main'] || '.'
 
         begin
             Dir.chdir( File.expand_path(dir_main) )
@@ -77,7 +79,7 @@ class BotConfig
 
         # Collect and enable plugins
         # Load core plugins
-        plugins_core = config['directories']['plugins']['core'] || "#{dir_main}/plugins/core"
+        plugins_core = @config['directories']['plugins']['core'] || "#{dir_main}/plugins/core"
 
         raise "Required directory, #{plugins_core}, cannot be found.  Please check your plugins_core configuration item and try again." unless Dir.exists?(plugins_core)
 
@@ -89,7 +91,7 @@ class BotConfig
 
         begin
             # Load optional extra plugins
-            plugins_extra = config['plugins_extra'] || 'plugins/enabled'
+            plugins_extra = @config['plugins_extra'] || 'plugins/enabled'
             puts "Loading extra plugins from #{plugins_extra}"
   
             # Find the files in the plugin_dir and load them
@@ -112,6 +114,9 @@ class BotConfig
         return classes
     end
 
+    def owner
+      @config['owner']
+    end
 end
 
 # Load and process the config file
@@ -128,7 +133,8 @@ config.networks.each do |name, network|
                 c.authentication          = Cinch::Configuration::Authentication.new
                 c.authentication.level    = :users
                 c.authentication.strategy = :list
-                c.authentication.admins   = ['Conch']   # ToDo:  This needs to be dynamic
+                c.authentication.owner    = config.owner
+                c.authentication.admins   = [config.owner]
                 c.authentication.users    = c.authentication.admins
 
                 # Plugin configuration

@@ -1,25 +1,25 @@
-# Copy this file to conchbot.yml and make the appropriate modifications.
+# Copy this file to cinchbot.yml and make the appropriate modifications.
 directories:
-  main: ~/conchbot
+  main: ~/cinchbot
   plugins:
     core:  plugins/core
     extra: plugins/enabled
 networks:
   dalnet:
     server: irc.dal.net
-    realname: Lord Conch
-    user: conchbot
+    realname: King Conch
+    user: cinchbot
     nicks: 
-      - ConchBot
-      - LordConch
+      - CinchBot
+      - KingConch
     channels:
-      - '#conchbot'
+      - '#cinchbot'
     sasl:
       username: username
       password: password
   freenode:
     server: irc.freenode.net
-    realname: Conch Bot
+    realname: King Conch
     user: conchbot
     nick: conchbot
     channels:

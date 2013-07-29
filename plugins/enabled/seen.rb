@@ -17,16 +17,16 @@ class Seen
   end
 
   def listen(m)
-    @users[m.user.nick] = SeenStruct.new(m.user, m.channel, m.message, Time.now)
+    @users[m.user.nick.downcase] = SeenStruct.new(m.user, m.channel, m.message, Time.now)
   end
 
   def execute(m, nick)
-    if nick == @bot.nick
+    if nick.downcase == @bot.nick.downcase
       m.reply "That's me!"
-    elsif nick == m.user.nick
+    elsif nick.downcase == m.user.nick.downcase
       m.reply "That's you!"
-    elsif @users.key?(nick)
-      m.reply @users[nick].to_s
+    elsif @users.key?(nick.downcase)
+      m.reply @users[nick.downcase].to_s
     else
       m.reply "I haven't seen #{nick}"
     end

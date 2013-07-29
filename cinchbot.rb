@@ -1,4 +1,12 @@
 #!/usr/bin/env ruby
+
+# Global variables
+$AUTHOR  = 'Donovan C. Young'
+$VERSION = 'v1.2'
+$PROGRAM = "#{File.basename($PROGRAM_NAME).gsub('.rb', '')}" 
+
+LIB = File.expand_path(File.dirname(__FILE__)) + '/lib'
+
 require 'rubygems'
 require 'bundler/setup'
 require 'pp'
@@ -7,18 +15,15 @@ require 'thwait'
 require 'sequel'
 require 'cinch'
 require 'cinch/extensions/authentication'
-require_relative 'lib/optparse'
-require_relative 'lib/botconfig'
 
-$AUTHOR  = 'Donovan C. Young'
-$VERSION = 'v1.2'
-$PROGRAM = "#{File.basename($PROGRAM_NAME).gsub('.rb', '')}" 
+require "#{LIB}/optparse"
+require "#{LIB}/botconfig"
 
 # Parse command line arguments
 $options = OptParse.parse(ARGV)
 
 # Load and process the config file
-config  = BotConfig.new( $options.conf_file ) || exit
+config  = CinchBot::Config.new( $options.conf_file ) || exit
 
 # Create a threadswait container
 threads = ThreadsWait.new

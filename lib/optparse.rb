@@ -10,6 +10,7 @@ class OptParse
         # We set default values here.
         options = OpenStruct.new
         options.conf_file = nil
+        options.debug = false
         options.verbose = false
         options.pretend = false
 
@@ -20,7 +21,7 @@ class OptParse
             opts.separator "Specific options:"
 
             # Mandatory argument.
-            opts.on('-c', '--config CONFIG', 'Read our configuration items from CONFIG') do |conf|
+            opts.on('-c', '--config FILE', 'Read our configuration items from FILE') do |conf|
                 options.conf_file = conf if File.exists?(conf)
             end
 
@@ -29,26 +30,32 @@ class OptParse
                 options.verbose = v
             end
 
-            opts.on_tail('--pretend', "Run the program but don't actually start the bots") do
-                options.pretend = true
-            end
-
             opts.separator ""
             opts.separator "Common options:"
 
             # No argument, shows at tail.  This will print an options summary.
             # Try it and see!
-            opts.on_tail("-h", "--help", "Show this message") do
+            opts.on("-h", "--help", "Show this message") do
                 puts version + "\n"
                 puts opts
                 exit
             end
 
             # Another typical switch to print the version.
-            opts.on_tail("--version", "Show version") do
+            opts.on("--version", "Show version") do
                 puts version
                 exit
             end
+
+            opts.on('--pretend', "Run the program but don't actually start the bots") do
+                options.pretend = true
+            end
+
+            opts.on('--debug', "Show debugging information during run") do
+                options.debug = true
+                options.verbose = true
+            end
+
         end
 
         opt_parser.parse!(args)
@@ -64,4 +71,3 @@ class OptParse
     end
 
 end  # class OptParse
-

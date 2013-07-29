@@ -80,30 +80,32 @@ module CinchBot
 
             raise "Required directory, #{plugins_core}, cannot be found.  Please check your plugins_core configuration item and try again." unless Dir.exists?(plugins_core)
 
-            puts "Loading core plugins from #{plugins_core}" if $options.debug
+            puts "Loading core plugins from #{plugins_core}" if $options.verbose
 
             Dir.glob("#{plugins_core}/*.rb").each do |file| 
                 require_relative "#{dir_main}/#{file}"
                 @plugins[:core] << Plugin.new(file)
+                puts "Loading #{file}" if $options.debug
             end
 
             begin
                 # Load optional extra plugins
                 plugins_extra = @config['plugins_extra'] || 'plugins/enabled'
 
-                puts "Loading extra plugins from #{plugins_extra}" if $options.debug
+                puts "Loading extra plugins from #{plugins_extra}" if $options.verbose
       
                 # Find the files in the plugin_dir and load them
                 Dir.glob("#{plugins_extra}/*.rb").each do |file| 
                     require_relative "#{dir_main}/#{file}"
                     @plugins[:extra] << Plugin.new(file)
+                    puts "Loading #{file}" if $options.debug
                 end
 
             rescue Errno::ENOENT
                 puts 'Whoops, looks like the plugins directory specified in the config (plugins_extra) is invalid.'
             end
 
-            puts "#{@plugins[:extra].count > 0 ? @plugins[:extra].count : 'no'} plugins loaded." if $options.debug
+            puts "#{@plugins[:extra].count > 0 ? @plugins[:extra].count : 'no'} plugins loaded." if $options.verbose
 
         end
 
@@ -113,7 +115,17 @@ module CinchBot
         def plugins
             classes = Array.new
             @plugins.keys.each { |key| @plugins[key].map { |f| classes << f.classname } }
-            return classes
+            classes
         end
+
+        def path( item )
+            case item.to_s
+            when /main/     then @config['dir_main']
+            when /core/     then @config['plugins']['core']
+            when /plugins?/ then @config['plugins']['extra']
+            else nil
+            end
+        end
+
     end # Class
 end # Module

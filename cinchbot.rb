@@ -23,13 +23,13 @@ require "#{LIB}/botconfig"
 $options = OptParse.parse(ARGV)
 
 # Load and process the config file
-config  = CinchBot::Config.new( $options.conf_file ) || exit
+$config  = CinchBot::Config.new( $options.conf_file ) || exit
 
 # Create a threadswait container
 threads = ThreadsWait.new
 
 # cycle through the configured networks and start our bot(s)
-config.networks.each do |name, network|
+$config.networks.each do |name, network|
     Thread.abort_on_exception = true    # Show exceptions as they happen
     thread = Thread.new do
         bot = Cinch::Bot.new do
@@ -41,10 +41,10 @@ config.networks.each do |name, network|
                 c.authentication.level    = [:owner, :admins, :users]
 
                 # Plugin configuration
-                c.plugins.plugins = config.plugins
+                c.plugins.plugins = $config.plugins
 
                 # Set defaults (may be overwritten below)
-                config.defaults.each { |key, value| c.send( "#{key}=".to_sym, value ) }
+                $config.defaults.each { |key, value| c.send( "#{key}=".to_sym, value ) }
 
                 # Server configuration
                 network.server.each do |key, value| 
@@ -64,6 +64,7 @@ config.networks.each do |name, network|
         end
 
         puts "Starting connection to #{bot.config.server}" if $options.verbose
+        pp bot.config if $options.debug
         bot.start unless $options.pretend
     end
 

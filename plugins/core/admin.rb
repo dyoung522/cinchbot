@@ -2,9 +2,9 @@ class Admin
     include Cinch::Plugin
     include Cinch::Extensions::Authentication
 
-    match /quit\s*(.*)/                     , :method => :bot_quit
-    match /(?:leave|part)\s*(#\S*)\s*(.*)/  , :method => :bot_part
-    match /join\s*(#\S+)/                   , :method => :bot_join
+    match /quit\s*(.*)/                                 , :method => :bot_quit
+    match /(?:leave|part)(?:\s+(#\S+))?(?:\s+(.*))?/    , :method => :bot_part
+    match /join\s+(#\S+)/                               , :method => :bot_join
 
     def bot_quit( m, msg = nil )
         return unless authenticated?( m, :owner )
@@ -14,24 +14,19 @@ class Admin
     def bot_part( m, channel = nil, reason = nil )
         return unless authenticated?( m, :admins )
 
-        channel = m.channel if channel.to_s.empty?
-        reason = nil if reason.to_s.empty?
+        channel ||= m.channel
+        reason  ||= "requested by #{m.user}"
 
         if bot.channels.include?(channel)
-            bot.part( channel, reason || "requested by #{m.nick}" )
+            bot.part( channel, reason )
         else
-            m.reply "I'm not in #{channel}"
+            m.reply "Sorry, but I'm not in #{channel}"
         end
     end
 
     def bot_join( m, channel )
         return unless authenticated?( m, :admins )
-
-        if channel
-            bot.join channel
-        else
-            m.reply 'Usage: join <channel>'
-        end
+        Channel(channel).join
     end
 
 end

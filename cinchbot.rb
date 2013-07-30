@@ -2,7 +2,7 @@
 
 # Global variables
 $AUTHOR  = 'Donovan C. Young'
-$VERSION = 'v1.2'
+$VERSION = 'v1.3'
 $PROGRAM = "#{File.basename($PROGRAM_NAME).gsub('.rb', '')}" 
 
 LIB = File.expand_path(File.dirname(__FILE__)) + '/lib'

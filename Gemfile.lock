@@ -7,9 +7,9 @@ GIT
 
 GIT
   remote: git://github.com/cinchrb/cinch.git
-  revision: edcd787a809a4ee809d624683c5afc9b0918c3fe
+  revision: 186033a8a51d51e1c7919ee5ccebed0ecfbdf63a
   specs:
-    cinch (2.0.5)
+    cinch (2.0.7)
 
 GEM
   remote: https://rubygems.org/

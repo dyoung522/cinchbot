@@ -8,5 +8,5 @@ install
 
 1. run 'gem install bundle'
 2. run 'bundle install' (to install gem dependencies)
-3. copy config_example.yml to cinchbot.yml and modify it to your liking
+3. copy config_example.yml to cinchbot.yml and modify it to your liking (or use --config)
 4. run './cinchbot.rb' to start the bot

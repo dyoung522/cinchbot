@@ -105,7 +105,9 @@ module CinchBot
                 puts 'Whoops, looks like the plugins directory specified in the config (plugins_extra) is invalid.'
             end
 
-            puts "#{@plugins[:extra].count > 0 ? @plugins[:extra].count : 'no'} plugins loaded." if $options.verbose
+            [:core, :extra].each do |sym|
+                puts "#{@plugins[sym].count > 0 ? @plugins[sym].count : 'no'} #{sym.to_s} plugins loaded." if $options.verbose
+            end
 
         end
 
@@ -120,10 +122,10 @@ module CinchBot
 
         def path( item )
             case item.to_s
-            when /main/     then @config['dir_main']
-            when /core/     then @config['plugins']['core']
-            when /plugins?/ then @config['plugins']['extra']
-            else nil
+                when /main/     then @config['dir_main']
+                when /core/     then @config['plugins']['core']
+                when /plugins?/ then @config['plugins']['extra']
+                else nil
             end
         end
 

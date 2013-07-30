@@ -3,8 +3,8 @@ class Admin
     include Cinch::Extensions::Authentication
 
     match /quit\s*(.*)/                     , :method => :bot_quit
-    match /(?:leave|part)\s*(\S*)\s*(.*)/   , :method => :bot_part
-    match /join\s*(\S+)/                    , :method => :bot_join
+    match /(?:leave|part)\s*(#\S*)\s*(.*)/  , :method => :bot_part
+    match /join\s*(#\S+)/                   , :method => :bot_join
 
     def bot_quit( m, msg = nil )
         return unless authenticated?( m, :owner )
@@ -33,4 +33,5 @@ class Admin
             m.reply 'Usage: join <channel>'
         end
     end
+
 end

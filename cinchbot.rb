@@ -63,14 +63,18 @@ $config.networks.each do |name, network|
             end
         end
 
-        puts "Starting connection to #{bot.config.server}" if $options.verbose
-        pp bot.config if $options.debug
-        bot.start unless $options.pretend
+        # Set primary log ouput to info
+        bot.loggers.first.level = $options.debug ? :debug : :info
+
+        unless $options.pretend
+            puts "Starting connection to #{bot.config.server}" if $options.verbose
+            bot.start
+        end
     end
 
     threads.join_nowait( thread )
 end
 
-sleep 1 while threads.all_waits 
+sleep while threads.all_waits 
 
-puts "That's all folks." if $options.verbose
+puts "All connections dropped.  That's all, folks." if $options.verbose and !$options.pretend

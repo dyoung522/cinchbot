@@ -3,7 +3,7 @@ class UserList
   include Cinch::Extensions::Authentication
 
   set :plugin_name, 'userlists'
-  set :help, <<-USAGE.gsub(/^ {6}/, '')
+  set :help, <<-USAGE.gsub(/^\s*/, '')
     Allows you to add/delete users from user lists used for authentication.
     Usage:
     - !add_to_<level> <nickname>: Adds a user to the <level> list.

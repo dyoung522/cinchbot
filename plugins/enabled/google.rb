@@ -5,6 +5,10 @@ require 'cgi'
 
 class Google
   include Cinch::Plugin
+
+  set :plugin_name, 'google'
+  set :help, "Usage: !#{self.plugin_name} <lookup> : Performs a Google search on <lookup>"
+
   match /google (.+)/
 
   def search(query)

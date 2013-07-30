@@ -30,6 +30,12 @@ threads = ThreadsWait.new
 
 # cycle through the configured networks and start our bot(s)
 $config.networks.each do |name, network|
+
+    # Skip this network if it's been disabled.
+    next if network.server.has_key?('disabled')
+
+    puts "Building config for #{name}" if $options.debug
+
     Thread.abort_on_exception = true    # Show exceptions as they happen
     thread = Thread.new do
         bot = Cinch::Bot.new do

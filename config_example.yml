@@ -27,6 +27,7 @@ networks:
     sasl:
       username: username
       password: password
+      
   freenode:
     server: irc.freenode.net
     nick: conchbot

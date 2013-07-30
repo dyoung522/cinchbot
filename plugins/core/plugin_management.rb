@@ -43,11 +43,6 @@ class PluginManagement
     end
 
     def unload_plugin(m, plugin)
-        # if plugin == self.class.name
-            # m.reply "We cannot unload #{plugin} (it would be self destruction)."
-            # return
-        # end
-        
         begin
             plugin_class = Cinch::Plugins.const_get(plugin)
         rescue NameError

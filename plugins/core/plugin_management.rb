@@ -1,17 +1,23 @@
 class PluginManagement
     include Cinch::Plugin
 
-    match(/plugin load (\S+)(?: (\S+))?/, method: :load_plugin)
-    match(/plugin unload (\S+)/, method: :unload_plugin)
-    match(/plugin reload (\S+)(?: (\S+))?/, method: :reload_plugin)
-    match(/plugin set (\S+) (\S+) (.+)$/, method: :set_option)
+    match /plugin load (\S+)(?: (\S+))?/   , method: :load_plugin
+    match /plugin unload (\S+)/            , method: :unload_plugin
+    match /plugin reload (\S+)(?: (\S+))?/ , method: :reload_plugin
+    match /plugin set (\S+) (\S+) (.+)$/   , method: :set_option
+    match /plugin list/                    , method: :list_plugins
 
     def load_plugin(m, plugin, mapping)
         mapping ||= plugin.gsub(/(.)([A-Z])/) { |_| $1 + "_" + $2 }.downcase # we downcase here to also catch the first letter
+        file_name = nil
 
-        file_name = "#{$config.path('plugins')}/#{mapping}.rb"
-        unless File.exist?(file_name)
-            m.reply "Could not load #{plugin} because #{file_name} does not exist."
+        [ :core, :plugins ].each do |mod|
+            file = File.join($config.path(mod), "#{mapping}.rb")
+            file_name = file if File.exist?(file)
+        end
+
+        unless file_name
+            m.reply "Could not load #{plugin} because #{mapping}.rb does not exist."
             return
         end
 
@@ -34,6 +40,11 @@ class PluginManagement
     end
 
     def unload_plugin(m, plugin)
+        if plugin == self.class.name
+            m.reply "We cannot unload #{plugin} (it would be self destruction)."
+            return
+        end
+        
         begin
             plugin_class = Cinch::Plugins.const_get(plugin)
         rescue NameError
@@ -82,5 +93,13 @@ class PluginManagement
             return
         end
         @bot.config.plugins.options[const][option.to_sym] = eval(value)
+    end
+
+    def list_plugins( m )
+        # TODO:  This needs to return the plugin name (when defined)
+        plugins = @bot.plugins.map { |p| p.class.plugin_name }
+
+        m.reply "Configured plugins: #{plugins.join(', ')}"
+        m.reply "Use !help <plugin> for more information (may not be available for all plugins)"
     end
 end

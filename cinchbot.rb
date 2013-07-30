@@ -63,8 +63,14 @@ $config.networks.each do |name, network|
             end
         end
 
-        # Set primary log ouput to info
-        bot.loggers.first.level = $options.debug ? :debug : :info
+        # Add file logging when requested.
+        bot.loggers << Cinch::Logger::FormattedLogger.new($options.log_file) if $options.log_file
+
+        # Set Default logging level
+        bot.loggers.level = $options.debug ? :debug : :info
+
+        # close down STDERR unless verbose has been specified
+        bot.loggers.first.level = :warn unless $options.verbose
 
         unless $options.pretend
             puts "Starting connection to #{bot.config.server}" if $options.verbose
@@ -75,6 +81,7 @@ $config.networks.each do |name, network|
     threads.join_nowait( thread )
 end
 
+# Wait for all threads to complete
 sleep while threads.all_waits 
 
 puts "All connections dropped.  That's all, folks." if $options.verbose and !$options.pretend

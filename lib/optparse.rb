@@ -9,10 +9,11 @@ class OptParse
         # The options specified on the command line will be collected in *options*.
         # We set default values here.
         options = OpenStruct.new
-        options.conf_file = nil
-        options.debug = false
-        options.verbose = false
-        options.pretend = false
+        options.conf_file   = nil
+        options.log_file    = nil
+        options.debug       = false
+        options.verbose     = false
+        options.pretend     = false
 
         opt_parser = OptionParser.new do |opts|
             opts.banner = "Usage: #{File.basename($PROGRAM_NAME)} [options]"
@@ -20,28 +21,34 @@ class OptParse
             opts.separator ""
             opts.separator "Specific options:"
 
-            # Mandatory argument.
+            # Config file
             opts.on('-c', '--config FILE', 'Read our configuration items from FILE') do |conf|
                 options.conf_file = conf if File.exists?(conf)
             end
 
-            # Boolean switch.
-            opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+            # Log File
+            opts.on('-l', '--logfile FILE', 'Log output to FILE') do |log|
+                begin
+                    options.log_file = File.open(log, 'a') 
+                rescue
+                    puts "WARNING: Cannot open log file '#{log}'"
+                end
+            end
+
+            # Verbose switch
+            opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
                 options.verbose = v
             end
 
             opts.separator ""
             opts.separator "Common options:"
 
-            # No argument, shows at tail.  This will print an options summary.
-            # Try it and see!
             opts.on("-h", "--help", "Show this message") do
                 puts version + "\n"
                 puts opts
                 exit
             end
 
-            # Another typical switch to print the version.
             opts.on("--version", "Show version") do
                 puts version
                 exit

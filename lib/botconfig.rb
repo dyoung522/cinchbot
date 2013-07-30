@@ -70,7 +70,7 @@ module CinchBot
             begin
                 Dir.chdir dir_main
             rescue
-                puts "WARNING: #{dir_main} does not exist; using current directory -- this may fail."
+                puts "WARNING: #{dir_main} does not exist; using current directory -- this may cause failures later."
                 dir_main = File.expand_path('.')
             end
 
@@ -86,6 +86,15 @@ module CinchBot
                 require_relative "#{dir_main}/#{file}"
                 @plugins[:core] << Plugin.new(file)
                 puts "Loading #{file}" if $options.debug
+            end
+
+            # Set and open our log file
+            if @config.has_key?('log_file') and !$options.log_file
+                begin
+                    $options.log_file = File.open(@config['log_file'], 'a')
+                rescue
+                    puts "WARNING: Could not open log file #{@config['log_file']} (from config)"
+                end
             end
 
             begin

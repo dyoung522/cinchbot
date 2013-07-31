@@ -2,11 +2,14 @@ class PluginManagement
     include Cinch::Plugin
     include Cinch::Extensions::Authentication
 
+    set :plugin_name, 'plugins'
+    set :help, "Usage: !plugin [load|unload|reload|set|list]"
+
     match /plugin load (\S+)(?: (\S+))?/   , method: :load_plugin
     match /plugin unload (\S+)/            , method: :unload_plugin
     match /plugin reload (\S+)(?: (\S+))?/ , method: :reload_plugin
     match /plugin set (\S+) (\S+) (.+)$/   , method: :set_option
-    match /plugin list/                    , method: :list_plugins
+    match /plugins? list/                    , method: :list_plugins
 
     def load_plugin(m, plugin, mapping)
         return unless authenticated?( m, :owners )

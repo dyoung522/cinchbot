@@ -11,7 +11,7 @@ module CinchBot
     class Config
         Network = Struct.new( :server, :port, :ssl, :password, :nick, :nicks, :realname, :user, 
                               :messages_per_second, :server_queue_size, :strictness, :message_split_start, 
-                              :message_split_end, :max_messages, :plugins, :channels, :encoding, :reconnect, 
+                              :message_split_end, :max_messages, :channels, :encoding, :reconnect, 
                               :max_reconnect_delay, :local_host, :timeouts, :ping_interval, :delay_joins, :dcc, 
                               :shared, :sasl, :auth, :auth_file, :log_file, :disabled )
 

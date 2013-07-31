@@ -23,6 +23,7 @@ $options = OptParse.parse(ARGV)
 
 # Load and process the config file
 $config  = CinchBot::Config.new( $options.conf_file ) || exit
+pp $config
 
 # Create a threadswait container
 threads = ThreadsWait.new
@@ -44,12 +45,6 @@ $config.networks.each do |name, network|
                 c.authentication.strategy = :list
                 c.authentication.level    = [ :owners, :admins, :users ]
 
-                # Plugin configuration
-                c.plugins.plugins = $config.plugins
-
-                # Set defaults (may be overwritten below)
-                # $config.defaults.each { |key, value| c.send( "#{key}=".to_sym, value ) }
-
                 # Server configuration
                 network.each_pair do |key, value|
                     case key
@@ -61,9 +56,12 @@ $config.networks.each do |name, network|
                         c.authentication.admins = ( value['admins'] || [] )
                         c.authentication.users  = ( value['users']  || [] )
                     else
-                        c.send( "#{key}=".to_sym, value )
+                        c.send( "#{key}=".to_sym, value ) unless value.nil?
                     end
                 end
+
+                # Plugin configuration
+                c.plugins.plugins = $config.plugins
             end
         end
 

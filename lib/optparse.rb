@@ -23,16 +23,7 @@ class OptParse
 
             # Config file
             opts.on('-c', '--config FILE', 'Read our configuration items from FILE') do |conf|
-                options.conf_file = conf if File.exists?(conf)
-            end
-
-            # Log File
-            opts.on('-l', '--logfile FILE', 'Log output to FILE') do |log|
-                begin
-                    options.log_file = File.open(log, 'a') 
-                rescue
-                    puts "WARNING: Cannot open log file '#{log}'"
-                end
+                options.conf_file = conf
             end
 
             # Verbose switch

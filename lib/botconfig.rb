@@ -9,11 +9,11 @@ end
 # Class to load and process our config file
 module CinchBot
     class Config
-        Network = Struct.new( :server, :port, :ssl, :password, :nick, :nicks,
-                              :realname, :user, :messages_per_second, :server_queue_size,
-                              :strictness, :message_split_start, :message_split_end,
-                              :max_messages, :plugins, :channels, :encoding, :reconnect, :max_reconnect_delay,
-                              :local_host, :timeouts, :ping_interval, :delay_joins, :dcc, :shared, :sasl )
+        Network = Struct.new( :server, :port, :ssl, :password, :nick, :nicks, :realname, :user, 
+                              :messages_per_second, :server_queue_size, :strictness, :message_split_start, 
+                              :message_split_end, :max_messages, :plugins, :channels, :encoding, :reconnect, 
+                              :max_reconnect_delay, :local_host, :timeouts, :ping_interval, :delay_joins, :dcc, 
+                              :shared, :sasl, :auth, :auth_file, :log_file, :disabled )
 
         # Class to handle plugin files
         class Plugin
@@ -31,41 +31,79 @@ module CinchBot
         end
 
         # Container attributes
-        attr_reader :defaults, :networks
+        attr_reader :defaults, :networks, :config_file
 
-        def initialize( config_file )
-            return unless config_file
+        def __initvars__
+            @config         = nil
+            @networks       = Hash.new
+            @plugins        = { :core => [], :extra => [] }
+        end
+        private :__initvars__
 
-            @defaults = Hash.new
-            @networks = Hash.new
-            @plugins  = {
-                core: [],
-                extra: []
-            }
+        def initialize( config_file = nil )
+            __initvars__
+
+            # Autoload the config
+            load config_file
+        end
+
+        def load( config_file = nil )
+            # Reset vars, makes for clean reloads
+            __initvars__
+
+            @config_file = config_file if config_file
+
+            # Bomb out if we get here without a config_file being set
+            raise RuntimeError "A config_file has not been provided." unless @config_file
 
             begin
-                puts "Reading config from #{config_file}" if $options.verbose
-                @config = YAML.load_file( config_file )
-
-                # Populate @defaults
-                @config['networks'].delete('defaults').each { |key, value| @defaults[key] = value }
-
-                # Load networks hash
-                @config['networks'].each { |name, details| @networks[name] = Network.new( details ) }
+                puts "Reading config from #{@config_file}" if $options.verbose
+                @config = YAML.load_file( @config_file )
 
             # Syntax Error
             rescue Psych::SyntaxError
-                puts "Error:  There was a problem reading #{config_file}, please check it and try again"
-                exit
+                puts "Error:  There was a syntax error while reading from #{@config_file}, please check it and try again"
+                exit 1
 
             # No File
             rescue Errno::ENOENT
-                puts "Could not find #{config_file}, please create this file first."
-                exit
+                puts "Could not find #{@config_file}, please create this file first."
+                exit 1
+            end
+
+            # Populate @defaults
+            defaults = @config['networks'].delete('defaults')
+
+            # Load networks hash
+            @config['networks'].each do |name, details| 
+                @networks[name] = Network.new
+
+                # Set and open our log file
+                if details.has_key?('log_file')
+                    begin
+                        @networks[name].log_file = File.open(details['log_file'], 'a')
+                    rescue Errno::ENOENT
+                        puts "FATAL: Could not open #{details['log_file']}"
+                        exit
+                    end
+                end
+
+                # Read in our Authentication file
+                if details.has_key?('auth_file') && File.exists?(details['auth_file'])
+                    @networks[name].auth = YAML.load_file( details['auth_file'] )
+                end
+
+                # Build the @network hash
+                details.each  { |key, value| @networks[name].send( "#{key}=".to_sym, value ) }
+
+                # Apply defaults
+                defaults.each do |key, value| 
+                    @networks[name].send( "#{key}=".to_sym, value ) unless @networks[name].send( key )
+                end
             end
 
             # Main Bot Directory (all future paths will be relative to this, unless specified otherwise in the config)
-            dir_main = ( File.expand_path(@config['dir_main']) || '.' )
+            dir_main = File.expand_path(@config['dir_main'])
 
             begin
                 Dir.chdir dir_main
@@ -86,15 +124,6 @@ module CinchBot
                 require_relative "#{dir_main}/#{file}"
                 @plugins[:core] << Plugin.new(file)
                 puts "Loading #{file}" if $options.debug
-            end
-
-            # Set and open our log file
-            if @config.has_key?('log_file') and !$options.log_file
-                begin
-                    $options.log_file = File.open(@config['log_file'], 'a')
-                rescue
-                    puts "WARNING: Could not open log file #{@config['log_file']} (from config)"
-                end
             end
 
             begin

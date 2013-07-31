@@ -7,7 +7,6 @@ $PROGRAM = "#{File.basename($PROGRAM_NAME).gsub('.rb', '')}"
 
 LIB = File.expand_path(File.dirname(__FILE__)) + '/lib'
 
-require 'rubygems'
 require 'bundler/setup'
 require 'pp'
 require 'yaml'
@@ -32,7 +31,7 @@ threads = ThreadsWait.new
 $config.networks.each do |name, network|
 
     # Skip this network if it's been disabled.
-    next if network.server.has_key?('disabled')
+    next if network.disabled
 
     puts "Building config for #{name}" if $options.debug
 
@@ -42,26 +41,25 @@ $config.networks.each do |name, network|
             configure do |c|
                 # Authentication configuration
                 c.authentication          = Cinch::Configuration::Authentication.new
-                c.authentication.level    = :users
                 c.authentication.strategy = :list
-                c.authentication.level    = [:owner, :admins, :users]
+                c.authentication.level    = [ :owners, :admins, :users ]
 
                 # Plugin configuration
                 c.plugins.plugins = $config.plugins
 
                 # Set defaults (may be overwritten below)
-                $config.defaults.each { |key, value| c.send( "#{key}=".to_sym, value ) }
+                # $config.defaults.each { |key, value| c.send( "#{key}=".to_sym, value ) }
 
                 # Server configuration
-                network.server.each do |key, value| 
+                network.each_pair do |key, value|
                     case key
-                    when /^sasl$/i
+                    when :sasl
                         c.sasl.username = value['username']
                         c.sasl.password = value['password']
-                    when /^auth$/i
-                        c.authentication.owner    = [ value['owner'] ]
-                        c.authentication.admins   = c.authentication.owner  + ( value['admins'] || [] )
-                        c.authentication.users    = c.authentication.admins + ( value['users']  || [] )
+                    when :auth
+                        c.authentication.owners = ( value['owners'] || [] )
+                        c.authentication.admins = ( value['admins'] || [] )
+                        c.authentication.users  = ( value['users']  || [] )
                     else
                         c.send( "#{key}=".to_sym, value )
                     end
@@ -69,8 +67,14 @@ $config.networks.each do |name, network|
             end
         end
 
+        # Validate authentication owner
+        if bot.config.authentication.owners.empty?
+            puts "FATAL:  No owners have been configured on #{name}, you need at least one. Not starting bot."
+            next
+        end
+
         # Add file logging when requested.
-        bot.loggers << Cinch::Logger::FormattedLogger.new($options.log_file) if $options.log_file
+        bot.loggers << Cinch::Logger::FormattedLogger.new(network.server['log_file']) if network.server['log_file']
 
         # Set Default logging level
         bot.loggers.level = $options.debug ? :debug : :info
@@ -78,10 +82,14 @@ $config.networks.each do |name, network|
         # close down STDERR unless verbose has been specified
         bot.loggers.first.level = :warn unless $options.verbose
 
+        print "Starting connection to #{bot.config.server}... " if $options.verbose
         unless $options.pretend
-            puts "Starting connection to #{bot.config.server}" if $options.verbose
             bot.start
+            puts "started." if $options.verbose
+        else
+            puts "(pretending)" if $options.verbose
         end
+
     end
 
     threads.join_nowait( thread )

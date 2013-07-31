@@ -3,7 +3,6 @@
 # Our main bot run dir, directories listed below will be relative to this
 # unless a full path is given.
 dir_main: ~/cinchbot
-log_file: cinchbot.log
 
 # Plugin directories
 plugins:
@@ -22,17 +21,36 @@ networks:
 
   dalnet:
     server: irc.dal.net
+
+    log_file: cinchbot.log
+    auth_file: dalnet.yml
+
     channels:
       - '#cinchbot'
+
     sasl:
       username: username
       password: password
-      
+
+    auth:
+      owner: your_auth_name
+      admins:
+        - admin1_auth_name
+        - admin2_auth_name
+      users:
+        - user1_auth_name
+        - user2_auth_name
+
   freenode:
     server: irc.freenode.net
     nick: conchbot
+
+    log_file: cinchbot.log
+    auth_file: freenode.yml
+
     channels:
       - '#cinch-bots'
+
     sasl:
       username: username
       password: password

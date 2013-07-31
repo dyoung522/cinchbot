@@ -8,9 +8,9 @@ class PluginManagement
     match /plugin set (\S+) (\S+) (.+)$/   , method: :set_option
     match /plugin list/                    , method: :list_plugins
 
-    enable_authentication
-
     def load_plugin(m, plugin, mapping)
+        return unless authenticated?( m, :owners )
+
         mapping ||= plugin.gsub(/(.)([A-Z])/) { |_| $1 + "_" + $2 }.downcase # we downcase here to also catch the first letter
         file_name = nil
 
@@ -43,6 +43,8 @@ class PluginManagement
     end
 
     def unload_plugin(m, plugin)
+        return unless authenticated?( m, :owners )
+
         begin
             plugin_class = Cinch::Plugins.const_get(plugin)
         rescue NameError
@@ -84,6 +86,8 @@ class PluginManagement
     end
 
     def set_option(m, plugin, option, value)
+        return unless authenticated?( m, :owners )
+
         begin
             const = Cinch::Plugins.const_get(plugin)
         rescue NameError
@@ -94,6 +98,8 @@ class PluginManagement
     end
 
     def list_plugins( m )
+        return unless authenticated?( m )
+
         plugins = @bot.plugins.map { |p| p.class.plugin_name }
 
         m.reply "Configured plugins: #{plugins.join(', ')}"

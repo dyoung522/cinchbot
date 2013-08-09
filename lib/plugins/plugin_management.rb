@@ -9,7 +9,7 @@ class PluginManagement
     match /plugin unload (\S+)/            , method: :unload_plugin
     match /plugin reload (\S+)(?: (\S+))?/ , method: :reload_plugin
     match /plugin set (\S+) (\S+) (.+)$/   , method: :set_option
-    match /plugins? list/                    , method: :list_plugins
+    match /plugins? list/                  , method: :list_plugins
 
     def load_plugin(m, plugin, mapping)
         return unless authenticated?( m, :owners )

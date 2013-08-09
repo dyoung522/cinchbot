@@ -44,25 +44,25 @@ class Admin
 
 
   # User Management
-  match /add_to_(\S+) (\S+)/s,      :method => :add
-  match /delete_from_(\S+) (\S)/s,  :method => :delete
-  match /show_(\S+)_list/s,         :method => :show
+  match /add_to_(\S+) (\S+)/s,          :method => :user_add
+  match /del(?:ete)?_from_(\S+) (\S)/s, :method => :user_del
+  match /show_(\S+)_list/s,             :method => :user_list
 
-  def add(m, level, nickname)
+  def user_add(m, level, nickname)
     return unless authenticated?( m, [ :owners, :admins ] )
     if bot.config.authentication.send(level) << nickname
       m.user.notice "#{nickname} has been added to the #{level} list."
     end
   end
 
-  def delete(m, level, nickname)
+  def user_del(m, level, nickname)
     return unless authenticated?( m, [ :owners, :admins ] )
     if bot.config.authentication.send(level).delete nickname
       m.user.notice "#{nickname} has been deleted from the #{level} list."
     end
   end
 
-  def show(m, level)
+  def user_list(m, level)
     return unless authenticated?( m, [ :owners, :admins ] )
     if bot.config.authentication.respond_to?(level)
       m.user.notice "Users in #{level}: #{bot.config.authentication.send(level).join( ', ' )}"

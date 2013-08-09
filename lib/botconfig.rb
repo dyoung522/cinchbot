@@ -128,7 +128,7 @@ module CinchBot
 
             begin
                 # Load optional extra plugins
-                plugins_extra = @config['plugins_extra'] || 'plugins/enabled'
+                plugins_extra = @config['plugins']['extra'] || 'plugins'
 
                 puts "Loading extra plugins from #{plugins_extra}" if $options.verbose
       

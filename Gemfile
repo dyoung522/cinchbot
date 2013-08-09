@@ -11,3 +11,4 @@ gem 'cucumber'
 
 # Required for plugins
 gem 'nokogiri'
+gem 'mechanize'

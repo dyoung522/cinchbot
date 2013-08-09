@@ -74,10 +74,6 @@ class UrlSummarizer
               m.reply "[#{Format(:bold, "twitter")}] <#{tweet[ 'user' ][ 'screen_name' ]}> #{escaped_text}"
             end
           end
-        when "imgur.com"
-          image_title = page.search("//h2[@id='image-title']").text
-          m.reply "[#{Format(:bold, "Imgur")}] " + image_title
-
         when "github.com"
           if uri.path =~ /\/(.+?)\/commit\//
             commit = JSON.load(open(link + ".json", :ssl_verify_mode => OpenSSL::SSL::VERIFY_NONE))["commit"]
@@ -100,15 +96,15 @@ class UrlSummarizer
           summary = nil
 
           catch :found do
-            description = page.at( 'meta[@name="description"]' )
-            if description
-              summary = description.attribute( 'content' ).to_s
+            title = page.title.gsub(/[\x00-\x1f]*/, "").gsub(/[ ]{2,}/, " ").strip rescue nil
+            if title
+              summary = title
               throw :found
             end
 
-            title = page.at( 'title' )
-            if title
-              summary = page.title.gsub(/[\x00-\x1f]*/, "").gsub(/[ ]{2,}/, " ").strip rescue nil
+            description = page.at( 'meta[@name="description"]' )
+            if description
+              summary = description.attribute( 'content' ).to_s
               throw :found
             end
 
@@ -122,7 +118,7 @@ class UrlSummarizer
           if summary
             summary = summary.strip.gsub( /\s+/, ' ' )
             summary = summary.split( /\n/ )[ 0 ] if summary.length > 10
-            m.reply "[#{Format(:bold, "URL")}] #{summary[ 0...160 ]}#{summary.size > 159 ? '[...]' : ''}"
+            m.reply "[#{Format(:bold, uri.host.gsub(/^www\./, ''))}] #{summary[ 0...160 ]}#{summary.size > 159 ? '[...]' : ''}"
           end
       end
     end

@@ -6,6 +6,9 @@ require 'cgi'
 class UrbanDict
   include Cinch::Plugin
 
+  set :plugin_name, 'urban'
+  set :help, "Usage: !#{self.plugin_name} <lookup> : Looks up definitions from urbandictionary.com"
+
   match /urban (.+)/
   def lookup(word)
     url = "http://www.urbandictionary.com/define.php?term=#{CGI.escape(word)}"

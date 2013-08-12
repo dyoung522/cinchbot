@@ -31,7 +31,8 @@ class PluginManagement
             load(file_name)
         rescue
             m.reply "Could not load #{plugin}."
-            raise
+            #raise
+            return
         end
 
         begin

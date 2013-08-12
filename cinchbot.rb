@@ -23,7 +23,6 @@ $options = OptParse.parse(ARGV)
 
 # Load and process the config file
 $config  = CinchBot::Config.new( $options.conf_file ) || exit
-pp $config
 
 # Create a threadswait container
 threads = ThreadsWait.new

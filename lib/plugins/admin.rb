@@ -8,6 +8,8 @@ class Admin
       - !join <channel>                 : join <channel>
       - !part [channel] [reason]        : leave [channel] with [reason] (current if channel omitted)
       - !quit [reason]                  : quit with reason (terminates bot)
+      - !nick <nick>                    : Change the bot's nick to <nick>
+      - !say [#channel] <message>       : Makes the bot say <message> in #channel or the current channel
 
       - !add_to_<level> <nickname>      : Adds a user to the <level> list.
       - !delete_from_<level> <nickname> : Deletes a user from the <level> list.
@@ -18,6 +20,8 @@ class Admin
   match /quit\s*(.*)/                                 , :method => :bot_quit
   match /(?:leave|part)(?:\s+(#\S+))?(?:\s+(.*))?/    , :method => :bot_part
   match /join\s+(#\S+)/                               , :method => :bot_join
+  match /nick\s+(\S+)/                                , :method => :bot_nick
+  match /say\s+(?:(#\S+)\s+)?(.*)/                    , :method => :bot_say
 
   def bot_quit( m, msg = nil )
     return unless authenticated?( m, :owners )
@@ -40,6 +44,21 @@ class Admin
   def bot_join( m, channel )
     return unless authenticated?( m, [ :owners, :admins ] )
     Channel(channel).join
+  end
+
+  def bot_nick( m, nick )
+    return unless authenticated?( m, [ :owners ] )
+    bot.nick=nick
+  end
+
+  def bot_say( m, channel, message )
+    return unless authenticated?(m)
+    channel ||= m.channel
+    if channel
+      Channel(channel).send message
+    else
+      m.reply "You asked me to say: '#{message}', but you didn't tell me which channel."
+    end
   end
 
 

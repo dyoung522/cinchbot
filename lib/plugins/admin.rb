@@ -5,15 +5,24 @@ class Admin
   set :plugin_name, 'admin'
   set :help, <<-USAGE.gsub(/^\s*/, '')
       Includes several admin-level bot commands:
-      - !join <channel>                 : join <channel>
-      - !part [channel] [reason]        : leave [channel] with [reason] (current if channel omitted)
-      - !quit [reason]                  : quit with reason (terminates bot)
-      - !nick <nick>                    : Change the bot's nick to <nick>
+      - !join <channel>                   : join <channel>
+      - !part [channel] [reason]          : leave [channel] with [reason] (current if channel omitted)
+      - !quit [reason]                    : quit with reason (terminates bot)
 
-      - !add_to_<level> <nickname>      : Adds a user to the <level> list.
-      - !delete_from_<level> <nickname> : Deletes a user from the <level> list.
-      - !show_<level>_list              : Shows the <level> list.
+      - !nick <nick>                      : Change the bot's nick to <nick>
+
+      - !user add_to <level> <nickname>   : Adds a user to the <level> list.
+      - !user del_from <level> <nickname> : Deletes a user from the <level> list.
+      - !user list <level>                : Shows the <level> list.
+
+      - !version                          : Display bot version information
   USAGE
+
+  match /version/, :method => :show_ver
+  def show_ver(m)
+    return unless authenticated?( m, [ :owners, :admins, :users ] )
+    m.reply sprintf "%s - v%s by %s\n", $PROGRAM, $VERSION, $AUTHOR
+  end
 
   # Quit, Part, Join
   match /quit\s*(.*)/                                 , :method => :bot_quit
@@ -51,9 +60,9 @@ class Admin
 
 
   # User Management
-  match /add_to_(\S+) (\S+)/s,          :method => :user_add
-  match /del(?:ete)?_from_(\S+) (\S)/s, :method => :user_del
-  match /show_(\S+)_list/s,             :method => :user_list
+  match /user add(?:_to)? (\S+) (\S+)/s,           :method => :user_add
+  match /user del(?:ete)?(?:_from)? (\S+) (\S+)/s, :method => :user_del
+  match /user list (\S+)/s,                        :method => :user_list
 
   def user_add(m, level, nickname)
     return unless authenticated?( m, [ :owners, :admins ] )

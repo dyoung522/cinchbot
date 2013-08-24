@@ -14,27 +14,39 @@ class Memo
 
   set :plugin_name, 'memo'
   set :help, <<-USAGE.gsub(/^\s*/, '')
-  !#{self.plugin_name} <nick> <message> :  Stores <message> for <nick>, which will be displayed the next time they are active.
-  !#{self.plugin_name} list : Shows a list of all memos available [Admin Only]
-  !#{self.plugin_name} del <nick> : Deletes any memos for <nick>  [Admin Only]
+  !#{self.plugin_name} add <nick> <message> : Stores <message> for <nick>, which will be displayed the next time they are active.
+  !#{self.plugin_name} del <nick>           : Deletes any memos for <nick>        [Admin Only]
+  !#{self.plugin_name} list                 : Shows a list of all memos available [Admin Only]
   USAGE
 
-  match /memo (.+?) (.+)/, :method => :store
   match /memo list/, :method => :list_store
-  match /memo del/, :method => :list_delete
+  match /memo add (\S+) (.+)/, :method => :store
+  match /memo (?:rem(?:ove)?|del(?:ete)?) (\S+)/, :method => :list_delete
 
   listen_to :message
   def listen(m)
     if @storage.exists?(m.user.nick)
-      m.user.send @storage.delete(m.user.nick)
+      seq = 0
+      @storage[m.user.nick].each do |message|
+        m.user.send "[%02d] %s" % [ seq += 1, message ]
+      end
+      @storage.delete(m.user.nick)
     end
   end
 
   def list_store(m)
     return unless authenticated?( m, [ :owners, :admins ] )
-    m.user.send "Here are the memos I've got stored..."
-    @storage.each do |nick, message|
-      m.user.send "For: #{nick} / \"#{message}\""
+    if @storage.count > 0
+      m.user.send "Here are the memos I've got stored..."
+      @storage.keys.each do |nick|
+        seq = 0
+        m.user.send "Messages for #{nick}:"
+        @storage[nick].each do |message|
+          m.user.send "[%02d] \"%s\"" % [ seq += 1, message ]
+        end
+      end
+    else
+      m.user.send "There are no memos stored."
     end
   end
 
@@ -42,21 +54,24 @@ class Memo
     return unless authenticated?( m, [ :owners, :admins ] )
     if @storage.exists?(nick)
       @storage.delete(nick)
-      m.user.send "Message for #{nick} has been removed"
+      m.user.send "Message(s) for #{nick} have been removed"
     else
-      m.user.send "No message were found for #{nick}"
+      m.user.send "No message(s) were found for #{nick}"
     end
   end
 
   def store(m, nick, message)
-    if @storage.exists?(nick)
-      m.reply "There's already a memo for #{nick}. You can only store one right now"
-    elsif nick == m.user.nick
+    if nick == m.user.nick
       m.reply "You can't leave memos for yourself.."
     elsif nick == bot.nick
       m.reply "You can't leave memos for me.."
     else
-      @storage[nick] = "[#{Time.now.asctime}] <#{m.channel.name}/#{m.user.name}> #{message}"
+      @storage[nick] = ( @storage.exists?(nick) ? @storage[nick] : Array.new ) << '[%s] <%s/%s> %s' % [
+          Time.now.asctime,
+          ( m.channel.nil? ? '[PM]' : m.channel.name ),
+          m.user.name,
+          message
+      ]
       m.reply "Added memo for #{nick}"
     end
   end

@@ -3,11 +3,13 @@ source 'https://rubygems.org'
 # Core cinch gems
 gem 'cinch', github: 'cinchrb/cinch'
 gem 'cinch-authentication', require: 'cinch/extensions/authentication', github: 'britishtea/cinch-authentication'
-gem 'sequel' # database O/RM
+gem 'nosequel', path: '../nosequel'
 
 # Required for testing
-gem 'rspec'
-gem 'cucumber'
+group :test do
+  gem 'rspec'
+  gem 'cucumber'
+end
 
 # Required for plugins
 gem 'nokogiri'

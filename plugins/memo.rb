@@ -61,6 +61,8 @@ class Memo
   end
 
   def store(m, nick, message)
+    return unless authenticated?(m)
+
     if nick == m.user.nick
       m.reply "You can't leave memos for yourself.."
     elsif nick == bot.nick

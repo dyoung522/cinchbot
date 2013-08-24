@@ -1,2 +1,4 @@
 cinchbot.yml
+auth/*.yml
+logs/*
 *.db

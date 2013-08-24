@@ -2,10 +2,11 @@
 
 # Global variables
 $AUTHOR  = 'Donovan C. Young'
-$VERSION = 'v1.3'
-$PROGRAM = "#{File.basename($PROGRAM_NAME).gsub('.rb', '')}" 
+$VERSION = '0.3.0'
+$PROGRAM = "#{File.basename($PROGRAM_NAME).gsub('.rb', '')}"
 
 LIB = File.expand_path(File.dirname(__FILE__)) + '/lib'
+$LOAD_PATH.unshift(LIB) unless $LOAD_PATH.include?(LIB)
 
 require 'bundler/setup'
 require 'pp'
@@ -14,9 +15,10 @@ require 'thwait'
 require 'sequel'
 require 'cinch'
 require 'cinch/extensions/authentication'
+require 'nosequel'
 
-require "#{LIB}/optparse"
-require "#{LIB}/botconfig"
+require 'options'
+require 'botconfig'
 
 # Parse command line arguments
 $options = OptParse.parse(ARGV)
@@ -43,6 +45,8 @@ $config.networks.each do |name, network|
                 c.authentication          = Cinch::Configuration::Authentication.new
                 c.authentication.strategy = :list
                 c.authentication.level    = [ :owners, :admins, :users ]
+
+                c.storage                 = NoSequel::Configuration.new(db_name: "data/#{name}.db")
 
                 # Server configuration
                 network.each_pair do |key, value|

@@ -78,8 +78,8 @@ class Socialize
 
     if m.message =~ /#{bot.nick}/i
       case m.message
-        when /thank|gracias/i                       then m.reply Reply.new(:thank,  80).respond_to(m.user.nick)
-        when /(hello|hi|howdy|eve|morn|noon|hola)/i then m.reply Reply.new(:hello,  90).percent(90).respond_to(m.user.nick)
+        when /thank|gracias/i                       then m.reply Reply.new(:thank,  90).respond_to(m.user.nick)
+        when /(hello|hi|howdy|eve|morn|noon|hola)/i then m.reply Reply.new(:hello,  75).percent(90).respond_to(m.user.nick)
         when /(fuck|shit|cunt|suck|cock|dick|ass)/i then m.reply Reply.new(:insult, 10).percent(10).respond_to(m.user.nick)
         else m.reply Reply.new(:other).respond_to(m.user.nick)
       end

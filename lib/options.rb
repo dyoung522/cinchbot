@@ -65,7 +65,7 @@ class OptParse
     end  # parse()
 
     def self.version
-        sprintf "%s - %s by %s\n", $PROGRAM, $VERSION, $AUTHOR
+        sprintf "%s - v%s by %s\n", $PROGRAM, $VERSION, $AUTHOR
     end
 
 end  # class OptParse

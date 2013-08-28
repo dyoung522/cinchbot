@@ -7,6 +7,7 @@ class Socialize
       Listens to the channel for the bot's nick, response appropriately when heard.
       Also includes social bot commands:
       - !say [#channel] <message>       : Makes the bot say <message> in #channel or the current channel
+      - !rimshot                        : Provides a joke response
   USAGE
 
   class Reply
@@ -44,6 +45,17 @@ class Socialize
           "yes %NICK%?",
           "right back atcha %NICK%",
           "I didn't catch that %NICK%"
+      ],
+
+      :rimshot => [
+          "Ba dum dum *crash*",
+          "hehe",
+          "LOL!",
+          "No.",
+          "meh.",
+          "don't quit your day job, %NICK%",
+          "%NICK%: not funny.",
+          "get a life, huh?",
       ]
     }
 
@@ -53,7 +65,6 @@ class Socialize
     end
 
     def respond_to ( nick = 'human' )
-      puts "There's a #{@percent}% chance of a response."
       return '' unless rand(100) < @percent
       return "I have nothing to say, #{nick}" unless @responses
       @responses[rand(@responses.length)].gsub(/%NICK%/, nick)
@@ -71,6 +82,7 @@ class Socialize
 
   listen_to :message
   match /say\s+(?:(#\S+)\s+)?(.*)/, :method => :bot_say
+  match /rimshot$/,                 :method => :rimshot
 
   def listen(m)
     return if m.message =~ /^#{bot.config.plugins.prefix}/
@@ -78,9 +90,9 @@ class Socialize
 
     if m.message =~ /#{bot.nick}/i
       case m.message
-        when /thank|gracias/i                       then m.reply Reply.new(:thank,  90).respond_to(m.user.nick)
-        when /(hello|hi|howdy|eve|morn|noon|hola)/i then m.reply Reply.new(:hello,  75).percent(90).respond_to(m.user.nick)
-        when /(fuck|shit|cunt|suck|cock|dick|ass)/i then m.reply Reply.new(:insult, 10).percent(10).respond_to(m.user.nick)
+        when /thank|gracias/i                       then m.reply Reply.new(:thank).respond_to(m.user.nick)
+        when /(hello|hi|howdy|eve|morn|noon|hola)/i then m.reply Reply.new(:hello).percent(90).respond_to(m.user.nick)
+        when /(fuck|shit|cunt|suck|cock|dick|ass)/i then m.reply Reply.new(:insul).percent(10).respond_to(m.user.nick)
         else m.reply Reply.new(:other).respond_to(m.user.nick)
       end
     end
@@ -94,6 +106,11 @@ class Socialize
     else
       m.reply "I'm sorry, but you didn't tell me which channel."
     end
+  end
+
+  def rimshot( m )
+    return unless authenticated?(m)
+    m.reply Reply.new(:rimshot).percent(25).respond_to(m.user.nick)
   end
 
 end #Class
